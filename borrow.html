@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📦 ยืมอุปกรณ์</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>📦 ยืมอุปกรณ์</h1>
+
+    <button id="scan-btn">📷 สแกนอุปกรณ์</button>
+    <div id="reader" style="width:100%; max-width:400px; margin-top:1rem; display:none;"></div>
+
+    <form id="borrow-form" style="display:none; margin-top:1rem;">
+      <div>
+        <label>อุปกรณ์ที่เลือก:</label>
+        <input type="text" id="itemName" name="itemName" readonly />
+        <input type="hidden" id="itemId" name="itemId" />
+      </div>
+
+      <label for="returnTime">⏰ เวลาคืน:</label>
+      <input type="time" id="returnTime" name="returnTime" required />
+
+      <label for="borrower">👤 ชื่อผู้ยืม:</label>
+      <input type="text" id="borrower" name="borrower" required />
+
+      <button type="submit" style="margin-top:1rem;">✅ ยืนยันการยืม</button>
+    </form>
+
+    <div id="status-message" style="margin-top:1rem;"></div>
+
+    <hr />
+    <a href="index.html">🔙 กลับหน้าหลัก</a>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
