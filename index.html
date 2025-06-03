@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ระบบจองลำโพงออนไลน์</title>
+  <title>ระบบจองอุปกรณ์ประชุม</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>📢 จองลำโพง</h1>
+    <h1>📢 จองอุปกรณ์ประชุม</h1>
     <form id="booking-form">
       <label for="date">📅 วันที่:</label>
       <input type="date" id="date" name="date" required />
@@ -18,6 +18,13 @@
 
       <label for="name">👤 ผู้จอง:</label>
       <input type="text" id="name" name="name" required />
+
+      <label>📦 อุปกรณ์ที่ต้องการ:</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="items" value="ลำโพง" /> ลำโพง</label>
+        <label><input type="checkbox" name="items" value="Pointer" /> Pointer</label>
+        <label><input type="checkbox" name="items" value="ปลั๊กไฟ" /> ปลั๊กไฟ</label>
+      </div>
 
       <button type="submit">✅ จอง</button>
     </form>
