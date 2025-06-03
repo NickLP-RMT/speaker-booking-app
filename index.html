@@ -8,22 +8,26 @@
 </head>
 <body>
   <div class="container">
-    <h1>📢 ระบบจองลำโพงออนไลน์</h1>
+    <h1>📢 จองลำโพง</h1>
     <form id="booking-form">
-      <label for="date">วันที่:</label>
+      <label for="date">📅 วันที่:</label>
       <input type="date" id="date" name="date" required />
 
-      <label for="time">เวลา:</label>
+      <label for="time">⏰ เวลา:</label>
       <input type="time" id="time" name="time" required />
 
-      <label for="name">ชื่อผู้จอง:</label>
+      <label for="name">👤 ผู้จอง:</label>
       <input type="text" id="name" name="name" required />
 
-      <button type="submit">จองลำโพง</button>
+      <button type="submit">✅ จอง</button>
     </form>
 
     <div id="status-message"></div>
+
+    <hr />
+    <a href="bookings.html">📋 ดูรายการจองทั้งหมด</a>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
