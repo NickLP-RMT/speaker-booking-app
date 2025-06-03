@@ -5,17 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🔄 Return Item</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <div class="container">
     <h1>🔄 Return Equipment</h1>
 
-    <div class="form-group">
-      <label>Enter Item ID</label>
-      <input type="text" id="manualItemId" class="form-input" placeholder="e.g. speaker001" />
-      <button class="scan-button" onclick="manualLookup()">🔍 Load Borrow Info</button>
-    </div>
+    <button class="scan-button" onclick="startScan()">📷 Scan QR to Return</button>
+    <div id="reader" class="scanner-container"></div>
 
     <form id="return-form" class="form-container" style="display:none">
       <div class="form-group">
@@ -41,13 +39,20 @@
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxP6hhCbSdB-B1Q0tSrHxlj0A-eOeI68CAbU1hNnwY4Nub763Aok6B-32Lw_1omH0Y/exec';
 
-    function manualLookup() {
-      const itemId = document.getElementById("manualItemId").value.trim();
-      if (!itemId) {
-        Swal.fire('Warning', 'Please enter an Item ID.', 'warning');
-        return;
-      }
-      loadBorrowInfo(itemId);
+    function startScan() {
+      const reader = document.getElementById('reader');
+      reader.style.display = 'block';
+
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        async (decodedText) => {
+          html5QrCode.stop();
+          reader.innerHTML = '';
+          loadBorrowInfo(decodedText.trim());
+        }
+      ).catch(err => console.error(err));
     }
 
     async function loadBorrowInfo(itemId) {
@@ -56,7 +61,6 @@
 
         const res = await fetch(`${scriptURL}?action=getLatestBorrow&itemId=${itemId}`);
         const data = await res.json();
-        console.log("DEBUG:", data);
 
         if (data.success) {
           document.getElementById('itemId').value = itemId;
@@ -102,26 +106,24 @@
     }
 
     function formatDateTime(dateStr, timeStr) {
-  if (!dateStr || !timeStr) return "Invalid Date";
+      if (!dateStr || !timeStr) return "Invalid Date";
 
-  // กรณี timeStr เป็น full datetime เช่น "1899-12-30T10:11:49.000Z"
-  const dateOnly = new Date(dateStr);
-  const timeOnly = new Date(timeStr);
+      const dateObj = new Date(dateStr);
+      const timeObj = new Date(timeStr);
 
-  if (isNaN(dateOnly) || isNaN(timeOnly)) return "Invalid Date";
+      if (isNaN(dateObj) || isNaN(timeObj)) return "Invalid Date";
 
-  // รวมวันที่และเวลาเข้าด้วยกัน
-  const finalDate = new Date(
-    dateOnly.getFullYear(), dateOnly.getMonth(), dateOnly.getDate(),
-    timeOnly.getHours(), timeOnly.getMinutes(), timeOnly.getSeconds()
-  );
+      const merged = new Date(
+        dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(),
+        timeObj.getHours(), timeObj.getMinutes(), timeObj.getSeconds()
+      );
 
-  return finalDate.toLocaleString('en-GB', {
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-    hour12: false
-  });
-}
+      return merged.toLocaleString('en-GB', {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false
+      });
+    }
   </script>
 </body>
 </html>
