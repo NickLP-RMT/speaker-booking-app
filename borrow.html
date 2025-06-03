@@ -3,23 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📦 ยืมอุปกรณ์</title>
+  <title>📦 ยืมอุปกรณ์ (ทดสอบ)</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
   <div class="container">
-    <h1>📦 ยืมอุปกรณ์</h1>
+    <h1>📦 ยืมอุปกรณ์ (Test Mode)</h1>
 
-    <button id="scan-btn">📷 สแกนอุปกรณ์</button>
-    <div id="reader" style="width:100%; max-width:400px; margin-top:1rem; display:none;"></div>
+    <form id="borrow-form">
+      <label for="itemId">🔤 รหัสอุปกรณ์ (เช่น speaker01):</label>
+      <input type="text" id="itemId" name="itemId" required />
 
-    <form id="borrow-form" style="display:none; margin-top:1rem;">
-      <div>
-        <label>อุปกรณ์ที่เลือก:</label>
-        <input type="text" id="itemName" name="itemName" readonly />
-        <input type="hidden" id="itemId" name="itemId" />
-      </div>
+      <label for="itemName">📦 ชื่ออุปกรณ์:</label>
+      <input type="text" id="itemName" name="itemName" required />
 
       <label for="returnTime">⏰ เวลาคืน:</label>
       <input type="time" id="returnTime" name="returnTime" required />
@@ -30,9 +26,38 @@
       <button type="submit" style="margin-top:1rem;">✅ ยืนยันการยืม</button>
     </form>
 
-    <div id="status-message" style="margin-top:1rem;"></div>
-  </div>
+    <div id="status-message" style="margin-top:1.5rem;"></div>
 
-  <script src="script.js"></script>
+    <script>
+      const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL'; // ← วาง URL Google Apps Script ที่ deploy แล้ว
+
+      document.getElementById('borrow-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const timeStr = now.toTimeString().split(':').slice(0, 2).join(':');
+
+        const formData = {
+          action: 'borrow',
+          date: dateStr,
+          time: timeStr,
+          itemId: document.getElementById('itemId').value.trim(),
+          itemName: document.getElementById('itemName').value.trim(),
+          returnTime: document.getElementById('returnTime').value,
+          borrower: document.getElementById('borrower').value.trim(),
+        };
+
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+
+        document.getElementById('status-message').textContent = '✅ ส่งข้อมูลเรียบร้อยแล้ว!';
+        e.target.reset();
+      });
+    </script>
+  </div>
 </body>
 </html>
