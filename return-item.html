@@ -2,80 +2,182 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🔁 คืนอุปกรณ์</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔄 คืนอุปกรณ์</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #2c3e50, #4ca1af);
+      padding: 20px;
+      margin: 0;
+      color: #333;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 24px;
+      color: #2c3e50;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    input:read-only {
+      background: #f3f3f3;
+    }
+    .btn-scan, .btn-return {
+      width: 100%;
+      padding: 14px;
+      margin-top: 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .btn-scan {
+      background: #3498db;
+      color: #fff;
+    }
+    .btn-return {
+      background: #27ae60;
+      color: #fff;
+    }
+    .status-message {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .status-success { background: #e0f7e9; color: #2e7d32; }
+    .status-error { background: #fce4e4; color: #c0392b; }
+    #reader { margin-top: 20px; border-radius: 16px; overflow: hidden; display: none; }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>🔁 คืนอุปกรณ์</h1>
-    <button id="scan-btn">📷 สแกนอุปกรณ์</button>
-    <div id="reader" style="width:100%; max-width:400px; margin-top:1rem; display:none;"></div>
+    <h1>🔄 คืนอุปกรณ์</h1>
 
-    <div id="item-info" style="display:none; margin-top:1rem;">
-      <p><strong>อุปกรณ์:</strong> <span id="itemName"></span></p>
-      <p><strong>รหัส:</strong> <span id="itemId"></span></p>
-      <p><strong>ผู้ยืม:</strong> <span id="borrower"></span></p>
-      <p><strong>วันที่ยืม:</strong> <span id="borrowDate"></span></p>
-      <p><strong>เวลาคืน:</strong> <span id="returnTime"></span></p>
-      <button id="return-btn">✅ ยืนยันคืน</button>
-    </div>
+    <button class="btn-scan" onclick="startScan()">📷 สแกน QR เพื่อคืน</button>
+    <div id="reader"></div>
 
-    <div id="status-message" style="margin-top:1rem;"></div>
+    <form id="return-form" style="display:none">
+      <div class="form-group">
+        <label>รหัสอุปกรณ์</label>
+        <input type="text" id="itemId" readonly />
+      </div>
+      <div class="form-group">
+        <label>ชื่ออุปกรณ์</label>
+        <input type="text" id="itemName" readonly />
+      </div>
+      <div class="form-group">
+        <label>ชื่อผู้ยืม</label>
+        <input type="text" id="borrower" readonly />
+      </div>
+      <div class="form-group">
+        <label>วันที่-เวลาเริ่มยืม</label>
+        <input type="text" id="borrowTime" readonly />
+      </div>
+      <button type="button" class="btn-return" onclick="submitReturn()">✅ คืนแล้ว</button>
+    </form>
+
+    <div id="status" class="status-message"></div>
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxzoSdg25f5cNWakp4Kx1b7bNALOgdOzE7eXazl0HUsRFL9igFseVnlnLzTG6zc1JY/exec';
+    const scriptURL = 'https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_URL/exec';
 
-    document.getElementById('scan-btn').addEventListener('click', () => {
-      document.getElementById('reader').style.display = 'block';
+    function startScan() {
+      const reader = document.getElementById('reader');
+      reader.style.display = 'block';
+
       const html5QrCode = new Html5Qrcode("reader");
       html5QrCode.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         async (decodedText) => {
           html5QrCode.stop();
-          document.getElementById('reader').style.display = 'none';
-          fetchBorrowInfo(decodedText);
+          reader.style.display = 'none';
+          loadBorrowInfo(decodedText.trim());
         }
       ).catch(err => console.error(err));
-    });
-
-    async function fetchBorrowInfo(itemId) {
-      const res = await fetch(`${scriptURL}?action=getBorrowInfo&itemId=${itemId}`);
-      const data = await res.json();
-
-      const status = document.getElementById("status-message");
-
-      if (!data.success) {
-        status.textContent = data.message;
-        status.style.color = "red";
-        return;
-      }
-
-      document.getElementById("itemName").textContent = data.itemName;
-      document.getElementById("itemId").textContent = data.itemId;
-      document.getElementById("borrower").textContent = data.borrower;
-      document.getElementById("borrowDate").textContent = data.date + ' ' + data.time;
-      document.getElementById("returnTime").textContent = data.returnTime;
-
-      document.getElementById("item-info").style.display = "block";
-      document.getElementById("return-btn").onclick = () => returnItem(itemId);
     }
 
-    async function returnItem(itemId) {
-      const res = await fetch(`${scriptURL}?action=returnItem&itemId=${itemId}`, { method: "POST" });
-      const data = await res.json();
-      const status = document.getElementById("status-message");
+    async function loadBorrowInfo(itemId) {
+      const status = document.getElementById('status');
+      status.textContent = '⏳ กำลังโหลดข้อมูล...';
+      status.className = 'status-message';
 
-      if (data.success) {
-        status.textContent = "✅ คืนสำเร็จ";
-        status.style.color = "green";
-        document.getElementById("item-info").style.display = "none";
-      } else {
-        status.textContent = data.message;
-        status.style.color = "red";
+      try {
+        const res = await fetch(`${scriptURL}?action=getLatestBorrow&itemId=${itemId}`);
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById('itemId').value = itemId;
+          document.getElementById('itemName').value = data.itemName;
+          document.getElementById('borrower').value = data.borrower;
+          document.getElementById('borrowTime').value = `${data.date} ${data.time}`;
+          document.getElementById('return-form').style.display = 'block';
+          status.textContent = '';
+        } else {
+          status.textContent = '❌ ไม่พบข้อมูลการยืมล่าสุด';
+          status.className = 'status-message status-error';
+        }
+      } catch (err) {
+        console.error(err);
+        status.textContent = '❌ เกิดข้อผิดพลาดในการโหลดข้อมูล';
+        status.className = 'status-message status-error';
+      }
+    }
+
+    async function submitReturn() {
+      const itemId = document.getElementById('itemId').value;
+      const status = document.getElementById('status');
+      const formData = new URLSearchParams();
+      formData.append("action", "return");
+      formData.append("itemId", itemId);
+
+      status.textContent = '⏳ กำลังบันทึก...';
+      status.className = 'status-message';
+
+      try {
+        const res = await fetch(scriptURL, {
+          method: "POST",
+          body: formData
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          status.textContent = '✅ คืนอุปกรณ์เรียบร้อยแล้ว';
+          status.className = 'status-message status-success';
+          document.getElementById('return-form').reset();
+          document.getElementById('return-form').style.display = 'none';
+        } else {
+          status.textContent = '❌ ' + result.message;
+          status.className = 'status-message status-error';
+        }
+      } catch (err) {
+        status.textContent = '❌ ไม่สามารถเชื่อมต่อได้';
+        status.className = 'status-message status-error';
       }
     }
   </script>
