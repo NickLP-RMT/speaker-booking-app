@@ -1,27 +1,29 @@
-document.getElementById('booking-form').addEventListener('submit', function (e) {
+const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL';
+
+// ====== ส่งแบบฟอร์มจอง (index.html) ======
+document.getElementById('booking-form')?.addEventListener('submit', function (e) {
   e.preventDefault();
 
   const formData = {
+    action: 'add',
     date: document.getElementById('date').value,
     time: document.getElementById('time').value,
     name: document.getElementById('name').value,
   };
 
-  fetch('YOUR_GOOGLE_SCRIPT_DEPLOYED_URL', {
+  fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
-    mode: 'no-cors', // เพื่อให้ส่งข้อมูลได้โดยไม่ติด CORS
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(formData),
   });
 
-  document.getElementById('status-message').textContent = '✅ ส่งข้อมูลเรียบร้อยแล้ว!';
+  document.getElementById('status-message').textContent = '✅ ส่งคำขอจองเรียบร้อยแล้ว!';
   document.getElementById('booking-form').reset();
 });
-// ดึงข้อมูลจาก Google Sheet ผ่าน Apps Script
+
+// ====== โหลดรายการจอง (bookings.html) ======
 async function loadBookings() {
-  const res = await fetch('YOUR_GOOGLE_SCRIPT_URL?action=read');
+  const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=read`);
   const data = await res.json();
 
   const tbody = document.querySelector('#booking-table tbody');
@@ -41,29 +43,30 @@ async function loadBookings() {
     tbody.appendChild(tr);
   });
 
+  // เพิ่ม Event Listener ให้ปุ่มอัปเดต
   document.querySelectorAll('.update-btn').forEach(button => {
     button.addEventListener('click', async (e) => {
       const index = e.target.dataset.index;
       const returned = document.querySelector(`.returned-checkbox[data-index="${index}"]`).checked;
       const itCheck = document.querySelector(`.itcheck-checkbox[data-index="${index}"]`).checked;
 
-      await fetch('YOUR_GOOGLE_SCRIPT_URL', {
+      await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'update',
-          rowIndex: parseInt(index) + 2, // เนื่องจากแถวแรกคือ header
+          rowIndex: parseInt(index) + 2, // +2 เพราะแถว 1 คือ header และ index เริ่มที่ 0
           returned,
           itCheck,
         }),
       });
 
-      alert('✅ อัปเดตเรียบร้อย');
+      alert('✅ อัปเดตเรียบร้อยแล้ว');
     });
   });
 }
 
-// โหลดข้อมูลเมื่อเปิดหน้า bookings.html
+// ====== เรียกใช้เมื่ออยู่หน้า bookings.html ======
 if (location.pathname.includes('bookings.html')) {
   loadBookings();
 }
