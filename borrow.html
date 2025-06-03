@@ -422,105 +422,120 @@
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxP6hhCbSdB-B1Q0tSrHxlj0A-eOeI68CAbU1hNnwY4Nub763Aok6B-32Lw_1omH0Y/exec';
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbxP6hhCbSdB-B1Q0tSrHxlj0A-eOeI68CAbU1hNnwY4Nub763Aok6B-32Lw_1omH0Y/exec';
 
-    document.getElementById('scan-btn').addEventListener('click', () => {
-      const readerElement = document.getElementById('reader');
-      readerElement.style.display = 'block';
+  document.getElementById('scan-btn').addEventListener('click', () => {
+    const readerElement = document.getElementById('reader');
+    readerElement.style.display = 'block';
 
-      const html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        async (decodedText) => {
-          html5QrCode.stop();
-          readerElement.style.display = 'none';
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      async (decodedText) => {
+        html5QrCode.stop();
+        readerElement.style.display = 'none';
 
-          const itemId = decodedText.trim();
-          document.getElementById('itemId').value = itemId;
-          document.getElementById('itemName').value = itemId;
-          document.getElementById('borrow-form').style.display = 'block';
+        const itemId = decodedText.trim();
+
+        // ✅ ตรวจสอบว่ามีการยืมค้างอยู่หรือไม่
+        const statusRes = await fetch(`${scriptURL}?action=checkItemStatus&itemId=${itemId}`);
+        const statusData = await statusRes.json();
+
+        if (statusData.success && statusData.isBorrowed) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'This item is not returned yet!',
+            html: `Borrowed by <b>${statusData.borrower}</b><br>on <b>${statusData.date}</b> at <b>${statusData.time}</b>.`,
+            confirmButtonColor: '#d97706'
+          });
+          return;
         }
-      ).catch(err => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Camera Error',
-          text: 'Unable to access camera. Please check permissions.',
-          confirmButtonColor: '#1e3a8a'
-        });
-        console.error(err);
+
+        // แสดงฟอร์มกรอกข้อมูล
+        document.getElementById('itemId').value = itemId;
+        document.getElementById('itemName').value = itemId;
+        document.getElementById('borrow-form').style.display = 'block';
+      }
+    ).catch(err => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Camera Error',
+        text: 'Unable to access camera. Please check permissions.',
+        confirmButtonColor: '#1e3a8a'
       });
+      console.error(err);
+    });
+  });
+
+  document.getElementById("borrow-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const now = new Date();
+    const date = now.toISOString().split('T')[0];
+    const time = now.toTimeString().split(' ')[0];
+    const itemId = document.getElementById("itemId").value;
+    const itemName = document.getElementById("itemName").value;
+    const returnTime = document.getElementById("returnTime").value;
+    const borrower = document.getElementById("borrower").value;
+
+    const formData = new URLSearchParams();
+    formData.append("action", "borrow");
+    formData.append("date", date);
+    formData.append("time", time);
+    formData.append("itemId", itemId);
+    formData.append("itemName", itemName);
+    formData.append("returnTime", returnTime);
+    formData.append("borrower", borrower);
+
+    Swal.fire({
+      title: 'Processing...',
+      text: 'Please wait while we process your request',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
     });
 
-    document.getElementById("borrow-form").addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      const now = new Date();
-      const date = now.toISOString().split('T')[0];
-      const time = now.toTimeString().split(' ')[0];
-      const itemId = document.getElementById("itemId").value;
-      const itemName = document.getElementById("itemName").value;
-      const returnTime = document.getElementById("returnTime").value;
-      const borrower = document.getElementById("borrower").value;
-
-      const formData = new URLSearchParams();
-      formData.append("action", "borrow");
-      formData.append("date", date);
-      formData.append("time", time);
-      formData.append("itemId", itemId);
-      formData.append("itemName", itemName);
-      formData.append("returnTime", returnTime);
-      formData.append("borrower", borrower);
-
-      Swal.fire({
-        title: 'Processing...',
-        text: 'Please wait while we process your request',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
+    try {
+      const res = await fetch(scriptURL, {
+        method: "POST",
+        body: formData,
       });
+      const result = await res.json();
 
-      try {
-        const res = await fetch(scriptURL, {
-          method: "POST",
-          body: formData,
+      if (result.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: result.message,
+          confirmButtonColor: '#059669',
+          timer: 3000,
+          timerProgressBar: true
         });
-        const result = await res.json();
 
-        if (result.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: result.message,
-            confirmButtonColor: '#059669',
-            timer: 3000,
-            timerProgressBar: true
-          });
-          
-          // Reset form and hide it
-          document.getElementById('borrow-form').reset();
-          document.getElementById('borrow-form').style.display = 'none';
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: result.message,
-            confirmButtonColor: '#dc2626'
-          });
-        }
-      } catch (err) {
-        console.error(err);
+        document.getElementById('borrow-form').reset();
+        document.getElementById('borrow-form').style.display = 'none';
+      } else {
         Swal.fire({
           icon: 'error',
-          title: 'Connection Error',
-          text: 'Unable to connect to server. Please check your internet connection.',
+          title: 'Error',
+          text: result.message,
           confirmButtonColor: '#dc2626'
         });
       }
-    });
-  </script>
+    } catch (err) {
+      console.error(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Connection Error',
+        text: 'Unable to connect to server. Please check your internet connection.',
+        confirmButtonColor: '#dc2626'
+      });
+    }
+  });
+</script>
 </body>
 </html>
