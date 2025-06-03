@@ -1,10 +1,9 @@
-/* ===== Global ===== */
+/* ===== Global Layout ===== */
 body {
   font-family: 'Segoe UI', sans-serif;
   background: #f0f4f8;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
   padding: 2rem 1rem;
   min-height: 100vh;
   margin: 0;
@@ -14,19 +13,20 @@ body {
   background: white;
   padding: 2rem;
   border-radius: 1rem;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   width: 100%;
   max-width: 600px;
   box-sizing: border-box;
 }
 
+/* ===== Header ===== */
 h1 {
   text-align: center;
   color: #2c3e50;
   margin-bottom: 1.5rem;
 }
 
-/* ===== Form ===== */
+/* ===== Form Elements ===== */
 label {
   display: block;
   margin-top: 1rem;
@@ -35,26 +35,15 @@ label {
 }
 
 input[type="text"],
-input[type="date"],
-input[type="time"] {
+input[type="time"],
+input[type="date"] {
   width: 100%;
   padding: 0.6rem;
   margin-top: 0.3rem;
   border: 1px solid #ccc;
   border-radius: 0.5rem;
   box-sizing: border-box;
-}
-
-/* ===== Checkbox Group ===== */
-.checkbox-group {
-  margin-top: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.checkbox-group label {
-  font-weight: normal;
+  font-size: 1rem;
 }
 
 /* ===== Buttons ===== */
@@ -75,29 +64,30 @@ button:hover {
   background-color: #2980b9;
 }
 
-.update-btn {
+.mark-return-btn {
   background-color: #2ecc71;
   color: white;
   padding: 0.4rem 0.8rem;
   border: none;
   border-radius: 0.3rem;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
-.update-btn:hover {
+.mark-return-btn:hover {
   background-color: #27ae60;
 }
 
-/* ===== Status Message ===== */
-#status-message {
+/* ===== Status Messages ===== */
+#status-message,
+#return-status-message {
   margin-top: 1rem;
   text-align: center;
   font-weight: bold;
   color: green;
 }
 
-/* ===== Table ===== */
+/* ===== Table for return.html or bookings.html ===== */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -120,7 +110,7 @@ tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-/* ===== Others ===== */
+/* ===== Navigation Links ===== */
 hr {
   margin: 2rem 0;
   border: none;
