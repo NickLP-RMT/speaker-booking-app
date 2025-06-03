@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ระบบจองลำโพงออนไลน์</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📢 ระบบจองลำโพงออนไลน์</h1>
+    <form id="booking-form">
+      <label for="date">วันที่:</label>
+      <input type="date" id="date" name="date" required />
+
+      <label for="time">เวลา:</label>
+      <input type="time" id="time" name="time" required />
+
+      <label for="name">ชื่อผู้จอง:</label>
+      <input type="text" id="name" name="name" required />
+
+      <button type="submit">จองลำโพง</button>
+    </form>
+
+    <div id="status-message"></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
