@@ -2,20 +2,24 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>📦 ยืมอุปกรณ์</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
   <div class="container">
     <h1>📦 ยืมอุปกรณ์</h1>
 
-    <form id="borrow-form" style="margin-top:1rem;">
-      <label for="itemId">🔤 รหัสอุปกรณ์ (itemId):</label>
-      <input type="text" id="itemId" name="itemId" required placeholder="เช่น speaker01" />
+    <button id="scan-btn">📷 สแกนอุปกรณ์</button>
+    <div id="reader" style="width:100%; max-width:400px; margin-top:1rem; display:none;"></div>
 
-      <label for="itemName">📛 ชื่ออุปกรณ์ (itemName):</label>
-      <input type="text" id="itemName" name="itemName" required placeholder="เช่น ลำโพง" />
+    <form id="borrow-form" style="display:none; margin-top:1rem;">
+      <div>
+        <label>อุปกรณ์ที่เลือก:</label>
+        <input type="text" id="itemName" name="itemName" readonly />
+        <input type="hidden" id="itemId" name="itemId" />
+      </div>
 
       <label for="returnTime">⏰ เวลาคืน:</label>
       <input type="time" id="returnTime" name="returnTime" required />
@@ -30,23 +34,47 @@
   </div>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwgHliCSwoXoCU4nW6p3qhsHk3QFXUkxv0aGAVwO6vAW4tzFDtKWAgj7Ac6yr9P6Dg/exec"; // แทนด้วย Script URL ของคุณ
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwgHliCSwoXoCU4nW6p3qhsHk3QFXUkxv0aGAVwO6vAW4tzFDtKWAgj7Ac6yr9P6Dg/exec'; // แทนที่ด้วย URL จริง
 
-    document.getElementById("borrow-form").addEventListener("submit", async function (e) {
+    document.getElementById('scan-btn').addEventListener('click', () => {
+      document.getElementById('reader').style.display = 'block';
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        async (decodedText) => {
+          html5QrCode.stop();
+          document.getElementById('reader').style.display = 'none';
+
+          const itemId = decodedText.trim();
+          const itemName = mapItemName(itemId);
+
+          document.getElementById('itemId').value = itemId;
+          document.getElementById('itemName').value = itemName;
+          document.getElementById('borrow-form').style.display = 'block';
+        }
+      ).catch(err => console.error(err));
+    });
+
+    function mapItemName(id) {
+      if (id.startsWith('speaker')) return 'ลำโพง';
+      if (id.startsWith('pointer')) return 'พอยน์เตอร์';
+      if (id.startsWith('plug')) return 'ปลั๊กไฟ';
+      return 'ไม่ทราบ';
+    }
+
+    document.getElementById("borrow-form").addEventListener("submit", async function(e) {
       e.preventDefault();
 
       const now = new Date();
-      const date = now.toLocaleDateString('en-CA');
+      const date = now.toISOString().split('T')[0];
       const time = now.toTimeString().split(' ')[0];
 
-      const itemId = document.getElementById("itemId").value.trim();
-      const itemName = document.getElementById("itemName").value.trim();
-      const returnTime = document.getElementById("returnTime").value.trim();
-      const borrower = document.getElementById("borrower").value.trim();
+      const itemId = document.getElementById("itemId").value;
+      const itemName = document.getElementById("itemName").value;
+      const returnTime = document.getElementById("returnTime").value;
+      const borrower = document.getElementById("borrower").value;
       const status = document.getElementById("status-message");
-
-      status.textContent = "⏳ กำลังส่งข้อมูล...";
-      status.style.color = "gray";
 
       const formData = new URLSearchParams();
       formData.append("action", "borrow");
@@ -57,6 +85,9 @@
       formData.append("returnTime", returnTime);
       formData.append("borrower", borrower);
 
+      status.textContent = "⏳ กำลังส่งข้อมูล...";
+      status.style.color = "gray";
+
       try {
         const res = await fetch(scriptURL, {
           method: "POST",
@@ -66,7 +97,8 @@
         status.textContent = result.message;
         status.style.color = result.success ? "green" : "red";
       } catch (err) {
-        status.textContent = "❌ เกิดข้อผิดพลาดในการเชื่อมต่อ";
+        console.error(err);
+        status.textContent = "❌ ไม่สามารถเชื่อมต่อได้";
         status.style.color = "red";
       }
     });
