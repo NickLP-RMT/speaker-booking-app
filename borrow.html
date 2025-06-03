@@ -5,17 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>📦 ยืมอุปกรณ์</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
   <div class="container">
     <h1>📦 ยืมอุปกรณ์</h1>
 
-    <form id="borrow-form">
-      <label for="itemId">🆔 รหัสอุปกรณ์ (เช่น speaker01):</label>
-      <input type="text" id="itemId" name="itemId" required />
+    <button id="scan-btn">📷 สแกนอุปกรณ์</button>
+    <div id="reader" style="width:100%; max-width:400px; margin-top:1rem; display:none;"></div>
 
-      <label for="itemName">📄 ชื่ออุปกรณ์:</label>
-      <input type="text" id="itemName" name="itemName" required />
+    <form id="borrow-form" style="display:none; margin-top:1rem;">
+      <div>
+        <label>อุปกรณ์ที่เลือก:</label>
+        <input type="text" id="itemName" name="itemName" readonly />
+        <input type="hidden" id="itemId" name="itemId" />
+      </div>
 
       <label for="returnTime">⏰ เวลาคืน:</label>
       <input type="time" id="returnTime" name="returnTime" required />
@@ -23,7 +27,7 @@
       <label for="borrower">👤 ชื่อผู้ยืม:</label>
       <input type="text" id="borrower" name="borrower" required />
 
-      <button type="submit">✅ ยืนยันการยืม</button>
+      <button type="submit" style="margin-top:1rem;">✅ ยืนยันการยืม</button>
     </form>
 
     <div id="status-message" style="margin-top:1rem;"></div>
@@ -32,42 +36,57 @@
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxzoSdg25f5cNWakp4Kx1b7bNALOgdOzE7eXazl0HUsRFL9igFseVnlnLzTG6zc1JY/exec';
 
+    document.getElementById('scan-btn').addEventListener('click', () => {
+      document.getElementById('reader').style.display = 'block';
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        async (decodedText) => {
+          html5QrCode.stop();
+          document.getElementById('reader').style.display = 'none';
+          document.getElementById('itemName').value = decodedText;
+          document.getElementById('itemId').value = decodedText;
+          document.getElementById('borrow-form').style.display = 'block';
+        }
+      ).catch(err => console.error(err));
+    });
+
     document.getElementById("borrow-form").addEventListener("submit", async function(e) {
       e.preventDefault();
 
-      const now = new Date();
-      const date = now.toLocaleDateString('sv-SE'); // YYYY-MM-DD
-      const time = now.toLocaleTimeString('th-TH', { hour12: false });
+      const itemId = document.getElementById("itemId").value;
+      const itemName = document.getElementById("itemName").value;
+      const returnTime = document.getElementById("returnTime").value;
+      const borrower = document.getElementById("borrower").value;
+      const status = document.getElementById("status-message");
+
+      status.textContent = "⏳ กำลังส่งข้อมูล...";
+      status.style.color = "gray";
 
       const params = new URLSearchParams({
-        action: 'borrow',
-        date,
-        time,
-        itemId: document.getElementById("itemId").value.trim(),
-        itemName: document.getElementById("itemName").value.trim(),
-        returnTime: document.getElementById("returnTime").value.trim(),
-        borrower: document.getElementById("borrower").value.trim()
+        page: "borrowItem",
+        itemId,
+        itemName,
+        returnTime,
+        borrower
       });
-
-      const status = document.getElementById("status-message");
-      status.textContent = "📤 กำลังส่งข้อมูล...";
-      status.style.color = "#666";
 
       try {
         const res = await fetch(`${scriptURL}?${params.toString()}`, { method: "POST" });
         const data = await res.json();
-
         if (data.success) {
-          status.textContent = "✅ " + data.message;
+          status.textContent = "✅ บันทึกการยืมสำเร็จ";
           status.style.color = "green";
           document.getElementById("borrow-form").reset();
+          document.getElementById("borrow-form").style.display = 'none';
         } else {
-          status.textContent = "❌ " + data.message;
+          status.textContent = data.message;
           status.style.color = "red";
         }
       } catch (err) {
         console.error(err);
-        status.textContent = "❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้";
+        status.textContent = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
         status.style.color = "red";
       }
     });
