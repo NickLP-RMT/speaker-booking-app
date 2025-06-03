@@ -1,4 +1,4 @@
-const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL'; // ← แก้เป็น Web App URL ของคุณ
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwvcBepDcExiLewpFIcdcmPfxyPCfZqrFRSg8AeKut9YgC8oZ5wG0zNer2BUF24me0/exec'; // ← แก้เป็น Web App URL ของคุณ
 
 // ====== 1. borrow.html (สแกน QR + กรอกเวลาคืน + ผู้ยืม) ======
 if (location.pathname.includes('borrow.html')) {
