@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📦 ยืมอุปกรณ์ (ทดสอบ)</title>
+  <title>📦 ยืมอุปกรณ์</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>📦 ยืมอุปกรณ์ (Test Mode)</h1>
+    <h1>📦 ยืมอุปกรณ์</h1>
 
     <form id="borrow-form">
-      <label for="itemId">🔤 รหัสอุปกรณ์ (เช่น speaker01):</label>
+      <label for="itemId">🆔 รหัสอุปกรณ์ (เช่น speaker01):</label>
       <input type="text" id="itemId" name="itemId" required />
 
-      <label for="itemName">📦 ชื่ออุปกรณ์:</label>
+      <label for="itemName">📄 ชื่ออุปกรณ์:</label>
       <input type="text" id="itemName" name="itemName" required />
 
       <label for="returnTime">⏰ เวลาคืน:</label>
@@ -23,41 +23,54 @@
       <label for="borrower">👤 ชื่อผู้ยืม:</label>
       <input type="text" id="borrower" name="borrower" required />
 
-      <button type="submit" style="margin-top:1rem;">✅ ยืนยันการยืม</button>
+      <button type="submit">✅ ยืนยันการยืม</button>
     </form>
 
-    <div id="status-message" style="margin-top:1.5rem;"></div>
-
-    <script>
-      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwvcBepDcExiLewpFIcdcmPfxyPCfZqrFRSg8AeKut9YgC8oZ5wG0zNer2BUF24me0/exec'; // ← วาง URL Google Apps Script ที่ deploy แล้ว
-
-      document.getElementById('borrow-form').addEventListener('submit', async function (e) {
-        e.preventDefault();
-
-        const now = new Date();
-        const dateStr = now.toISOString().split('T')[0];
-        const timeStr = now.toTimeString().split(':').slice(0, 2).join(':');
-
-        const formData = {
-          action: 'borrow',
-          date: dateStr,
-          time: timeStr,
-          itemId: document.getElementById('itemId').value.trim(),
-          itemName: document.getElementById('itemName').value.trim(),
-          returnTime: document.getElementById('returnTime').value,
-          borrower: document.getElementById('borrower').value.trim(),
-        };
-
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
-
-        document.getElementById('status-message').textContent = '✅ ส่งข้อมูลเรียบร้อยแล้ว!';
-        e.target.reset();
-      });
-    </script>
+    <div id="status-message" style="margin-top:1rem;"></div>
   </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxzoSdg25f5cNWakp4Kx1b7bNALOgdOzE7eXazl0HUsRFL9igFseVnlnLzTG6zc1JY/exec';
+
+    document.getElementById("borrow-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const now = new Date();
+      const date = now.toLocaleDateString('sv-SE'); // YYYY-MM-DD
+      const time = now.toLocaleTimeString('th-TH', { hour12: false });
+
+      const params = new URLSearchParams({
+        action: 'borrow',
+        date,
+        time,
+        itemId: document.getElementById("itemId").value.trim(),
+        itemName: document.getElementById("itemName").value.trim(),
+        returnTime: document.getElementById("returnTime").value.trim(),
+        borrower: document.getElementById("borrower").value.trim()
+      });
+
+      const status = document.getElementById("status-message");
+      status.textContent = "📤 กำลังส่งข้อมูล...";
+      status.style.color = "#666";
+
+      try {
+        const res = await fetch(`${scriptURL}?${params.toString()}`, { method: "POST" });
+        const data = await res.json();
+
+        if (data.success) {
+          status.textContent = "✅ " + data.message;
+          status.style.color = "green";
+          document.getElementById("borrow-form").reset();
+        } else {
+          status.textContent = "❌ " + data.message;
+          status.style.color = "red";
+        }
+      } catch (err) {
+        console.error(err);
+        status.textContent = "❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้";
+        status.style.color = "red";
+      }
+    });
+  </script>
 </body>
 </html>
