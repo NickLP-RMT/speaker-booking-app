@@ -1,106 +1,39 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔄 คืนอุปกรณ์</title>
+  <title>🔄 Return Item</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #2c3e50, #4ca1af);
-      padding: 20px;
-      margin: 0;
-      color: #333;
-    }
-    .container {
-      max-width: 400px;
-      margin: auto;
-      background: #fff;
-      border-radius: 20px;
-      padding: 32px 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 24px;
-      font-size: 24px;
-      color: #2c3e50;
-    }
-    .form-group {
-      margin-bottom: 16px;
-    }
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    input {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    input:read-only {
-      background: #f3f3f3;
-    }
-    .btn-scan, .btn-return {
-      width: 100%;
-      padding: 14px;
-      margin-top: 16px;
-      font-size: 16px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-    .btn-scan {
-      background: #3498db;
-      color: #fff;
-    }
-    .btn-return {
-      background: #27ae60;
-      color: #fff;
-    }
-    .status-message {
-      margin-top: 20px;
-      padding: 12px;
-      border-radius: 10px;
-      text-align: center;
-    }
-    .status-success { background: #e0f7e9; color: #2e7d32; }
-    .status-error { background: #fce4e4; color: #c0392b; }
-    #reader { margin-top: 20px; border-radius: 16px; overflow: hidden; display: none; }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <div class="container">
-    <h1>🔄 คืนอุปกรณ์</h1>
+    <h1>🔄 Return Equipment</h1>
 
-    <button class="btn-scan" onclick="startScan()">📷 สแกน QR เพื่อคืน</button>
-    <div id="reader"></div>
+    <button class="scan-button" onclick="startScan()">📷 Scan QR to Return</button>
+    <div id="reader" class="scanner-container"></div>
 
-    <form id="return-form" style="display:none">
+    <form id="return-form" class="form-container" style="display:none">
       <div class="form-group">
-        <label>รหัสอุปกรณ์</label>
-        <input type="text" id="itemId" readonly />
+        <label>Item ID</label>
+        <input type="text" id="itemId" class="form-input" readonly />
       </div>
       <div class="form-group">
-        <label>ชื่ออุปกรณ์</label>
-        <input type="text" id="itemName" readonly />
+        <label>Item Name</label>
+        <input type="text" id="itemName" class="form-input" readonly />
       </div>
       <div class="form-group">
-        <label>ชื่อผู้ยืม</label>
-        <input type="text" id="borrower" readonly />
+        <label>Borrower</label>
+        <input type="text" id="borrower" class="form-input" readonly />
       </div>
       <div class="form-group">
-        <label>วันที่-เวลาเริ่มยืม</label>
-        <input type="text" id="borrowTime" readonly />
+        <label>Borrowed Date & Time</label>
+        <input type="text" id="borrowTime" class="form-input" readonly />
       </div>
-      <button type="button" class="btn-return" onclick="submitReturn()">✅ คืนแล้ว</button>
+      <button type="button" class="submit-button" onclick="submitReturn()">✅ Confirm Return</button>
     </form>
-
-    <div id="status" class="status-message"></div>
   </div>
 
   <script>
@@ -123,46 +56,35 @@
     }
 
     async function loadBorrowInfo(itemId) {
-      const status = document.getElementById('status');
-      status.textContent = '⏳ กำลังโหลดข้อมูล...';
-      status.className = 'status-message';
-
       try {
+        Swal.fire({ title: 'Loading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
         const res = await fetch(`${scriptURL}?action=getLatestBorrow&itemId=${itemId}`);
         const data = await res.json();
 
         if (data.success) {
-          const [yyyy, mm, dd] = new Date(data.date).toISOString().split('T')[0].split('-');
-          const formattedDate = `${dd}/${mm}/${yyyy}`;
-          const formattedTime = data.time?.slice(0, 5) || '';
-          const formattedDateTime = `${formattedDate} ${formattedTime}`;
-
           document.getElementById('itemId').value = itemId;
           document.getElementById('itemName').value = data.itemName;
           document.getElementById('borrower').value = data.borrower;
-          document.getElementById('borrowTime').value = formattedDateTime;
+          document.getElementById('borrowTime').value = formatDateTime(data.date, data.time);
           document.getElementById('return-form').style.display = 'block';
-          status.textContent = '';
+          Swal.close();
         } else {
-          status.textContent = '❌ ไม่พบข้อมูลการยืมล่าสุด';
-          status.className = 'status-message status-error';
+          Swal.fire('Error', data.message, 'error');
         }
       } catch (err) {
         console.error(err);
-        status.textContent = '❌ เกิดข้อผิดพลาดในการโหลดข้อมูล';
-        status.className = 'status-message status-error';
+        Swal.fire('Error', 'Failed to load data.', 'error');
       }
     }
 
     async function submitReturn() {
       const itemId = document.getElementById('itemId').value;
-      const status = document.getElementById('status');
       const formData = new URLSearchParams();
       formData.append("action", "return");
       formData.append("itemId", itemId);
 
-      status.textContent = '⏳ กำลังบันทึก...';
-      status.className = 'status-message';
+      Swal.fire({ title: 'Submitting...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
       try {
         const res = await fetch(scriptURL, {
@@ -172,18 +94,24 @@
         const result = await res.json();
 
         if (result.success) {
-          status.textContent = '✅ คืนอุปกรณ์เรียบร้อยแล้ว';
-          status.className = 'status-message status-success';
+          Swal.fire('Success', 'Item returned successfully.', 'success');
           document.getElementById('return-form').reset();
           document.getElementById('return-form').style.display = 'none';
         } else {
-          status.textContent = '❌ ' + result.message;
-          status.className = 'status-message status-error';
+          Swal.fire('Error', result.message, 'error');
         }
       } catch (err) {
-        status.textContent = '❌ ไม่สามารถเชื่อมต่อได้';
-        status.className = 'status-message status-error';
+        Swal.fire('Error', 'Unable to connect to server.', 'error');
       }
+    }
+
+    function formatDateTime(date, time) {
+      const d = new Date(`${date}T${time}`);
+      const options = {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      };
+      return d.toLocaleString('en-US', options);
     }
   </script>
 </body>
