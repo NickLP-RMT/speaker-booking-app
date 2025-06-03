@@ -61,7 +61,8 @@
 
         const res = await fetch(`${scriptURL}?action=getLatestBorrow&itemId=${itemId}`);
         const data = await res.json();
-
+        console.log("DEBUG:", data);  // เพิ่มตรงนี้
+        
         if (data.success) {
           document.getElementById('itemId').value = itemId;
           document.getElementById('itemName').value = data.itemName;
@@ -108,29 +109,15 @@
   function formatDateTime(date, time) {
   if (!date || !time) return "Invalid Date";
 
-  const trimmedDate = date.trim();
-  const trimmedTime = time.trim();
+  const d = new Date(`${date.trim()}T${time.trim()}`);
+  console.log("Formatted DateTime String:", `${date.trim()}T${time.trim()}`);
+  console.log("Parsed Date Object:", d);
 
-  const timeParts = trimmedTime.split(':');
-  const h = timeParts[0].padStart(2, '0');
-  const m = (timeParts[1] || '00').padStart(2, '0');
-  const s = (timeParts[2] || '00').padStart(2, '0');
+  if (isNaN(d.getTime())) return "Invalid Date";
 
-  const dateTimeStr = `${trimmedDate}T${h}:${m}:${s}`;
-  const d = new Date(dateTimeStr);
-
-  if (isNaN(d.getTime())) {
-    console.warn('Invalid Date Input:', { trimmedDate, trimmedTime, dateTimeStr });
-    return "Invalid Date";
-  }
-
-  return d.toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+  return d.toLocaleString('en-GB', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
     hour12: false
   });
 }
