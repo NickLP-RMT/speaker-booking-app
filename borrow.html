@@ -34,7 +34,7 @@
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwgHliCSwoXoCU4nW6p3qhsHk3QFXUkxv0aGAVwO6vAW4tzFDtKWAgj7Ac6yr9P6Dg/exec'; // แทนที่ด้วย URL จริง
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwgHliCSwoXoCU4nW6p3qhsHk3QFXUkxv0aGAVwO6vAW4tzFDtKWAgj7Ac6yr9P6Dg/exec'; // แทนด้วย Script URL จริง
 
     document.getElementById('scan-btn').addEventListener('click', () => {
       document.getElementById('reader').style.display = 'block';
@@ -47,21 +47,14 @@
           document.getElementById('reader').style.display = 'none';
 
           const itemId = decodedText.trim();
-          const itemName = mapItemName(itemId);
 
           document.getElementById('itemId').value = itemId;
-          document.getElementById('itemName').value = itemName;
+          document.getElementById('itemName').value = itemId; // แสดงรหัสอุปกรณ์ตรง ๆ
+
           document.getElementById('borrow-form').style.display = 'block';
         }
       ).catch(err => console.error(err));
     });
-
-    function mapItemName(id) {
-      if (id.startsWith('speaker')) return 'ลำโพง';
-      if (id.startsWith('pointer')) return 'พอยน์เตอร์';
-      if (id.startsWith('plug')) return 'ปลั๊กไฟ';
-      return 'ไม่ทราบ';
-    }
 
     document.getElementById("borrow-form").addEventListener("submit", async function(e) {
       e.preventDefault();
