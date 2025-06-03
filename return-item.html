@@ -101,20 +101,27 @@
       }
     }
 
-    function formatDateTime(date, time) {
-      if (!date || !time) return "Invalid Date";
+    function formatDateTime(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return "Invalid Date";
 
-      const [year, month, day] = date.trim().split('-');
-      const d = new Date(`${year}-${month}-${day}T${time.trim()}`);
+  // กรณี timeStr เป็น full datetime เช่น "1899-12-30T10:11:49.000Z"
+  const dateOnly = new Date(dateStr);
+  const timeOnly = new Date(timeStr);
 
-      if (isNaN(d.getTime())) return "Invalid Date";
+  if (isNaN(dateOnly) || isNaN(timeOnly)) return "Invalid Date";
 
-      return d.toLocaleString('en-GB', {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-        hour12: false
-      });
-    }
+  // รวมวันที่และเวลาเข้าด้วยกัน
+  const finalDate = new Date(
+    dateOnly.getFullYear(), dateOnly.getMonth(), dateOnly.getDate(),
+    timeOnly.getHours(), timeOnly.getMinutes(), timeOnly.getSeconds()
+  );
+
+  return finalDate.toLocaleString('en-GB', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false
+  });
+}
   </script>
 </body>
 </html>
