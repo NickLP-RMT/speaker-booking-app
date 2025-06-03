@@ -104,7 +104,7 @@
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxP6hhCbSdB-B1Q0tSrHxlj0A-eOeI68CAbU1hNnwY4Nub763Aok6B-32Lw_1omH0Y/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz_hi65gr_rREIrxKR6wA4vszAadJJrHyit9hyTGcKUOGF6qPfgsICyXDK1SbgEpPU/exec';
 
     function startScan() {
       const reader = document.getElementById('reader');
@@ -132,10 +132,15 @@
         const data = await res.json();
 
         if (data.success) {
+          const [yyyy, mm, dd] = new Date(data.date).toISOString().split('T')[0].split('-');
+          const formattedDate = `${dd}/${mm}/${yyyy}`;
+          const formattedTime = data.time?.slice(0, 5) || '';
+          const formattedDateTime = `${formattedDate} ${formattedTime}`;
+
           document.getElementById('itemId').value = itemId;
           document.getElementById('itemName').value = data.itemName;
           document.getElementById('borrower').value = data.borrower;
-          document.getElementById('borrowTime').value = `${data.date} ${data.time}`;
+          document.getElementById('borrowTime').value = formattedDateTime;
           document.getElementById('return-form').style.display = 'block';
           status.textContent = '';
         } else {
