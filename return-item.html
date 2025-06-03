@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🔁 คืนอุปกรณ์</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -10,96 +10,74 @@
 <body>
   <div class="container">
     <h1>🔁 คืนอุปกรณ์</h1>
-
     <button id="scan-btn">📷 สแกนอุปกรณ์</button>
     <div id="reader" style="width:100%; max-width:400px; margin-top:1rem; display:none;"></div>
 
-    <div id="item-details" style="margin-top: 1.5rem; display:none;">
-      <p><strong>รหัสอุปกรณ์:</strong> <span id="item-id"></span></p>
-      <p><strong>ชื่ออุปกรณ์:</strong> <span id="item-name"></span></p>
-      <p><strong>ชื่อผู้ยืม:</strong> <span id="borrower"></span></p>
-      <p><strong>วันที่ยืม:</strong> <span id="date"></span></p>
-      <p><strong>เวลายืม:</strong> <span id="time"></span></p>
-
-      <button id="confirm-return" style="margin-top: 1rem;">✅ ยืนยันคืนสินค้า</button>
+    <div id="item-info" style="display:none; margin-top:1rem;">
+      <p><strong>อุปกรณ์:</strong> <span id="itemName"></span></p>
+      <p><strong>รหัส:</strong> <span id="itemId"></span></p>
+      <p><strong>ผู้ยืม:</strong> <span id="borrower"></span></p>
+      <p><strong>วันที่ยืม:</strong> <span id="borrowDate"></span></p>
+      <p><strong>เวลาคืน:</strong> <span id="returnTime"></span></p>
+      <button id="return-btn">✅ ยืนยันคืน</button>
     </div>
 
-    <div id="status-message" style="margin-top: 1.5rem;"></div>
-
-    <script>
-      const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL'; // ← เปลี่ยนตรงนี้
-
-      const scanBtn = document.getElementById('scan-btn');
-      const readerDiv = document.getElementById('reader');
-      const itemDetails = document.getElementById('item-details');
-      const statusMsg = document.getElementById('status-message');
-
-      const idSpan = document.getElementById('item-id');
-      const nameSpan = document.getElementById('item-name');
-      const borrowerSpan = document.getElementById('borrower');
-      const dateSpan = document.getElementById('date');
-      const timeSpan = document.getElementById('time');
-
-      const mapItemName = (id) => {
-        if (id.startsWith('speaker')) return 'ลำโพง';
-        if (id.startsWith('pointer')) return 'พอยน์เตอร์';
-        if (id.startsWith('plug')) return 'ปลั๊กไฟ';
-        return 'ไม่ทราบ';
-      };
-
-      let matchedRow = null;
-
-      scanBtn.addEventListener('click', async () => {
-        readerDiv.style.display = 'block';
-
-        const html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: 250 },
-          async (decodedText) => {
-            html5QrCode.stop();
-            readerDiv.innerHTML = '';
-
-            const itemId = decodedText.trim();
-            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=read`);
-            const data = await res.json();
-
-            const match = data
-              .map((row, i) => ({ ...row, rowIndex: i + 2 }))
-              .find(row => row.itemId === itemId && row.returned !== 'TRUE');
-
-            if (match) {
-              matchedRow = match;
-              idSpan.textContent = match.itemId;
-              nameSpan.textContent = mapItemName(match.itemId);
-              borrowerSpan.textContent = match.borrower;
-              dateSpan.textContent = match.date;
-              timeSpan.textContent = match.time;
-              itemDetails.style.display = 'block';
-              statusMsg.textContent = '';
-            } else {
-              statusMsg.textContent = '❌ ไม่พบรายการที่ยังไม่คืนสำหรับอุปกรณ์นี้';
-            }
-          },
-          (err) => {}
-        );
-      });
-
-      document.getElementById('confirm-return').addEventListener('click', async () => {
-        if (!matchedRow) return;
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'returnItem',
-            rowIndex: matchedRow.rowIndex,
-          }),
-        });
-
-        statusMsg.textContent = '✅ คืนอุปกรณ์เรียบร้อยแล้ว!';
-        itemDetails.style.display = 'none';
-      });
-    </script>
+    <div id="status-message" style="margin-top:1rem;"></div>
   </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxzoSdg25f5cNWakp4Kx1b7bNALOgdOzE7eXazl0HUsRFL9igFseVnlnLzTG6zc1JY/exec';
+
+    document.getElementById('scan-btn').addEventListener('click', () => {
+      document.getElementById('reader').style.display = 'block';
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        async (decodedText) => {
+          html5QrCode.stop();
+          document.getElementById('reader').style.display = 'none';
+          fetchBorrowInfo(decodedText);
+        }
+      ).catch(err => console.error(err));
+    });
+
+    async function fetchBorrowInfo(itemId) {
+      const res = await fetch(`${scriptURL}?action=getBorrowInfo&itemId=${itemId}`);
+      const data = await res.json();
+
+      const status = document.getElementById("status-message");
+
+      if (!data.success) {
+        status.textContent = data.message;
+        status.style.color = "red";
+        return;
+      }
+
+      document.getElementById("itemName").textContent = data.itemName;
+      document.getElementById("itemId").textContent = data.itemId;
+      document.getElementById("borrower").textContent = data.borrower;
+      document.getElementById("borrowDate").textContent = data.date + ' ' + data.time;
+      document.getElementById("returnTime").textContent = data.returnTime;
+
+      document.getElementById("item-info").style.display = "block";
+      document.getElementById("return-btn").onclick = () => returnItem(itemId);
+    }
+
+    async function returnItem(itemId) {
+      const res = await fetch(`${scriptURL}?action=returnItem&itemId=${itemId}`, { method: "POST" });
+      const data = await res.json();
+      const status = document.getElementById("status-message");
+
+      if (data.success) {
+        status.textContent = "✅ คืนสำเร็จ";
+        status.style.color = "green";
+        document.getElementById("item-info").style.display = "none";
+      } else {
+        status.textContent = data.message;
+        status.style.color = "red";
+      }
+    }
+  </script>
 </body>
 </html>
