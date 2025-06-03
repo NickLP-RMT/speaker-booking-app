@@ -3,7 +3,8 @@ body {
   background: #f0f4f8;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding: 2rem 1rem;
   min-height: 100vh;
   margin: 0;
 }
@@ -12,9 +13,10 @@ body {
   background: white;
   padding: 2rem;
   border-radius: 1rem;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
+  box-sizing: border-box;
 }
 
 h1 {
@@ -27,26 +29,31 @@ label {
   display: block;
   margin-top: 1rem;
   font-weight: bold;
+  color: #333;
 }
 
-input {
+input[type="text"],
+input[type="date"],
+input[type="time"] {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.6rem;
   margin-top: 0.3rem;
   border: 1px solid #ccc;
   border-radius: 0.5rem;
+  box-sizing: border-box;
 }
 
 button {
   margin-top: 1.5rem;
   width: 100%;
-  padding: 0.7rem;
+  padding: 0.8rem;
   border: none;
   background-color: #3498db;
   color: white;
   font-size: 1rem;
   border-radius: 0.5rem;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 button:hover {
@@ -57,4 +64,59 @@ button:hover {
   margin-top: 1rem;
   text-align: center;
   font-weight: bold;
+  color: green;
+}
+
+/* ตาราง bookings.html */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+th {
+  background-color: #3498db;
+  color: white;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.update-btn {
+  background-color: #2ecc71;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.update-btn:hover {
+  background-color: #27ae60;
+}
+
+hr {
+  margin: 2rem 0;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+a {
+  text-decoration: none;
+  color: #3498db;
+  display: inline-block;
+  margin-top: 1rem;
+}
+
+a:hover {
+  text-decoration: underline;
 }
