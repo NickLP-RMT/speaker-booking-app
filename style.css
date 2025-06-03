@@ -1,3 +1,4 @@
+/* ===== Global ===== */
 body {
   font-family: 'Segoe UI', sans-serif;
   background: #f0f4f8;
@@ -25,6 +26,7 @@ h1 {
   margin-bottom: 1.5rem;
 }
 
+/* ===== Form ===== */
 label {
   display: block;
   margin-top: 1rem;
@@ -43,6 +45,19 @@ input[type="time"] {
   box-sizing: border-box;
 }
 
+/* ===== Checkbox Group ===== */
+.checkbox-group {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.checkbox-group label {
+  font-weight: normal;
+}
+
+/* ===== Buttons ===== */
 button {
   margin-top: 1.5rem;
   width: 100%;
@@ -60,6 +75,21 @@ button:hover {
   background-color: #2980b9;
 }
 
+.update-btn {
+  background-color: #2ecc71;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.update-btn:hover {
+  background-color: #27ae60;
+}
+
+/* ===== Status Message ===== */
 #status-message {
   margin-top: 1rem;
   text-align: center;
@@ -67,7 +97,7 @@ button:hover {
   color: green;
 }
 
-/* ตาราง bookings.html */
+/* ===== Table ===== */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -90,20 +120,7 @@ tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-.update-btn {
-  background-color: #2ecc71;
-  color: white;
-  padding: 0.4rem 0.8rem;
-  border: none;
-  border-radius: 0.3rem;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.update-btn:hover {
-  background-color: #27ae60;
-}
-
+/* ===== Others ===== */
 hr {
   margin: 2rem 0;
   border: none;
