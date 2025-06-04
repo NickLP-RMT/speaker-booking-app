@@ -424,68 +424,90 @@
   <script>
   const scriptURL = 'https://script.google.com/macros/s/AKfycbxxV-QTLjIHtWhG9GhmXRMajnjKuI2yrNOx9EfwDR5nk8ma4qgiE1rvnpprGafSer8/exec';
 
-  document.getElementById('scan-btn').addEventListener('click', () => {
-  const readerElement = document.getElementById('reader');
-  readerElement.style.display = 'block';
+  // ✅ Helper: Format date + time from Google Sheets
+  function formatDateTimeReadable(dateStr, timeStr) {
+    const date = new Date(dateStr);
+    const time = new Date(timeStr);
 
-  const html5QrCode = new Html5Qrcode("reader");
-  html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    async (decodedText) => {
-      html5QrCode.stop();
-      readerElement.style.display = 'none';
+    if (isNaN(date) || isNaN(time)) return 'Invalid date';
 
-      const itemId = decodedText.trim();
+    const combined = new Date(
+      date.getFullYear(), date.getMonth(), date.getDate(),
+      time.getHours(), time.getMinutes(), time.getSeconds()
+    );
 
-      // ✅ แสดงโหลดก่อนตรวจสอบสถานะ
-      Swal.fire({
-        title: 'Checking item status...',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
-
-      try {
-        const statusRes = await fetch(`${scriptURL}?action=checkItemStatus&itemId=${itemId}`);
-        const statusData = await statusRes.json();
-
-        Swal.close(); // ✅ ปิดโหลดเมื่อเช็คเสร็จ
-
-        if (statusData.success && statusData.isBorrowed) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'This item is not returned yet!',
-            html: `Borrowed by <b>${statusData.borrower}</b><br>on <b>${statusData.date}</b> at <b>${statusData.time}</b>.`,
-            confirmButtonColor: '#d97706'
-          });
-          return;
-        }
-
-        document.getElementById('itemId').value = itemId;
-        document.getElementById('itemName').value = itemId;
-        document.getElementById('borrow-form').style.display = 'block';
-      } catch (err) {
-        Swal.close();
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to check item status.',
-          confirmButtonColor: '#dc2626'
-        });
-        console.error(err);
-      }
-    }
-  ).catch(err => {
-    Swal.fire({
-      icon: 'error',
-      title: 'Camera Error',
-      text: 'Unable to access camera. Please check permissions.',
-      confirmButtonColor: '#1e3a8a'
+    return combined.toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: false
     });
-    console.error(err);
-  });
-});
+  }
 
+  // ✅ Start scanning process
+  document.getElementById('scan-btn').addEventListener('click', () => {
+    const readerElement = document.getElementById('reader');
+    readerElement.style.display = 'block';
+
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      async (decodedText) => {
+        html5QrCode.stop();
+        readerElement.style.display = 'none';
+
+        const itemId = decodedText.trim();
+
+        // Show loading while checking
+        Swal.fire({
+          title: 'Checking item status...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        try {
+          const statusRes = await fetch(`${scriptURL}?action=checkItemStatus&itemId=${itemId}`);
+          const statusData = await statusRes.json();
+
+          Swal.close();
+
+          if (statusData.success && statusData.isBorrowed) {
+            const formattedDate = formatDateTimeReadable(statusData.date, statusData.time);
+            Swal.fire({
+              icon: 'warning',
+              title: 'This item is not returned yet!',
+              html: `Borrowed by <b>${statusData.borrower}</b><br>on <b>${formattedDate}</b>`,
+              confirmButtonColor: '#d97706'
+            });
+            return;
+          }
+
+          // Not borrowed → show form
+          document.getElementById('itemId').value = itemId;
+          document.getElementById('itemName').value = itemId;
+          document.getElementById('borrow-form').style.display = 'block';
+        } catch (err) {
+          Swal.close();
+          console.error(err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to check item status.',
+            confirmButtonColor: '#dc2626'
+          });
+        }
+      }
+    ).catch(err => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Camera Error',
+        text: 'Unable to access camera. Please check permissions.',
+        confirmButtonColor: '#1e3a8a'
+      });
+      console.error(err);
+    });
+  });
+
+  // ✅ Submit borrow form
   document.getElementById("borrow-form").addEventListener("submit", async function(e) {
     e.preventDefault();
 
