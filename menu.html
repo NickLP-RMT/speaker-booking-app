@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Booking System - Main Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-top: 40px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .header {
+            background: #4a5568;
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .system-title {
+            font-size: 18px;
+            font-weight: 500;
+            opacity: 0.95;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .illustration {
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .equipment-image {
+            margin-bottom: 16px;
+        }
+
+        .illustration-text {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .menu-button {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            min-height: 60px;
+            position: relative;
+        }
+
+        .button-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .button-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .button-arrow {
+            font-size: 18px;
+            opacity: 0.7;
+        }
+
+        .borrow-btn {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+        }
+
+        .borrow-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .borrow-btn:active {
+            transform: translateY(0);
+        }
+
+        .return-btn {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+        }
+
+        .return-btn:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        .return-btn:active {
+            transform: translateY(0);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .booking-flow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .flow-step {
+            width: 32px;
+            height: 32px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .flow-step.active {
+            background: #4a5568;
+            color: white;
+        }
+
+        .flow-arrow {
+            color: #cbd5e0;
+            font-size: 12px;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                margin-top: 20px;
+                border-radius: 12px;
+            }
+            
+            .header {
+                padding: 32px 24px;
+            }
+            
+            .logo {
+                font-size: 24px;
+            }
+            
+            .system-title {
+                font-size: 16px;
+            }
+            
+            .content {
+                padding: 32px 24px;
+            }
+            
+            .device-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .it-devices {
+                gap: 15px;
+            }
+        }
+
+        /* Focus states for accessibility */
+        .menu-button:focus {
+            outline: 3px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">RESONAC</div>
+            <div class="system-title">IT Booking System</div>
+        </div>
+        
+        <div class="content">
+            <div class="illustration">
+                <div class="booking-flow">
+                    <div class="flow-step active">1</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">2</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">3</div>
+                </div>
+                
+                <div class="equipment-image">
+                    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAEsASwDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQQEQUBIQAYGDIGEQGTFBQHFXGB0QITJB8jI1FhEyctJyoXGjEkGywgHRJyoWHTJl8=" alt="IT Equipment" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px;">
+                </div>
+                
+                <div class="illustration-text">
+                    Manage all IT equipment in one place
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <a href="https://nicklp-rmt.github.io/speaker-booking-app/borrow.html" 
+                   class="menu-button borrow-btn"
+                   role="button"
+                   aria-label="Borrow IT equipment">
+                    <div class="button-left">
+                        <span class="button-icon">📋</span>
+                        <span>Borrow Equipment</span>
+                    </div>
+                    <span class="button-arrow">→</span>
+                </a>
+                
+                <a href="https://nicklp-rmt.github.io/speaker-booking-app/return-item.html" 
+                   class="menu-button return-btn"
+                   role="button"
+                   aria-label="Return IT equipment">
+                    <div class="button-left">
+                        <span class="button-icon">↩️</span>
+                        <span>Return Equipment</span>
+                    </div>
+                    <span class="button-arrow">→</span>
+                </a>
+            </div>
+            
+            <div class="footer">
+                Select the action you want to proceed
+            </div>
+        </div>
+    </div>
+</body>
+</html>
