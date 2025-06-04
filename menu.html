@@ -14,8 +14,6 @@
       --gray-50: #f9fafb;
       --gray-100: #f3f4f6;
       --gray-200: #e5e7eb;
-      --gray-300: #d1d5db;
-      --gray-400: #9ca3af;
       --gray-500: #6b7280;
       --gray-800: #1f2937;
       --white: #ffffff;
@@ -54,32 +52,17 @@
       position: relative;
     }
 
-    .header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-      opacity: 0.2;
-    }
-
     .logo {
       font-size: 28px;
       font-weight: 800;
       letter-spacing: 2px;
       margin-bottom: 12px;
-      position: relative;
-      z-index: 1;
     }
 
     .system-title {
       font-size: 18px;
       font-weight: 500;
       opacity: 0.95;
-      position: relative;
-      z-index: 1;
     }
 
     .content {
@@ -97,6 +80,13 @@
 
     .equipment-image {
       margin-bottom: 16px;
+    }
+
+    .equipment-image img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 12px;
     }
 
     .illustration-text {
@@ -172,37 +162,6 @@
       font-size: 14px;
     }
 
-    .booking-flow {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .flow-step {
-      width: 32px;
-      height: 32px;
-      background: var(--gray-200);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      color: var(--gray-500);
-      font-weight: 600;
-    }
-
-    .flow-step.active {
-      background: var(--primary-color);
-      color: white;
-    }
-
-    .flow-arrow {
-      color: var(--gray-300);
-      font-size: 12px;
-    }
-
     @media (max-width: 480px) {
       body {
         padding: 12px;
@@ -230,11 +189,6 @@
         padding: 18px 20px;
       }
     }
-
-    .menu-button:focus {
-      outline: 3px solid var(--primary-light);
-      outline-offset: 2px;
-    }
   </style>
 </head>
 <body>
@@ -246,25 +200,16 @@
 
     <div class="content">
       <div class="illustration">
-        <div class="booking-flow">
-          <div class="flow-step active">1</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">2</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">3</div>
-        </div>
-
         <div class="equipment-image">
-          <img src="https://cdn-icons-png.flaticon.com/512/1048/1048953.png" alt="Equipment" style="width: 100%; max-height: 120px; object-fit: contain;" />
+          <img src="https://nicklp-rmt.github.io/speaker-booking-app/assets/it-devices.png" alt="IT Devices" />
         </div>
-
         <div class="illustration-text">
-          Manage all IT equipment in one place
+          Reserve and return IT devices easily
         </div>
       </div>
 
       <div class="buttons-container">
-        <a href="borrow.html" class="menu-button borrow-btn" role="button" aria-label="Borrow IT equipment">
+        <a href="borrow.html" class="menu-button borrow-btn" role="button">
           <div class="button-left">
             <span class="button-icon">📋</span>
             <span>Borrow Equipment</span>
@@ -272,7 +217,7 @@
           <span class="button-arrow">→</span>
         </a>
 
-        <a href="return-item.html" class="menu-button return-btn" role="button" aria-label="Return IT equipment">
+        <a href="return-item.html" class="menu-button return-btn" role="button">
           <div class="button-left">
             <span class="button-icon">↩️</span>
             <span>Return Equipment</span>
