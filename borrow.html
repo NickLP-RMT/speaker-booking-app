@@ -425,22 +425,31 @@
   const scriptURL = 'https://script.google.com/macros/s/AKfycbxxV-QTLjIHtWhG9GhmXRMajnjKuI2yrNOx9EfwDR5nk8ma4qgiE1rvnpprGafSer8/exec';
 
   document.getElementById('scan-btn').addEventListener('click', () => {
-    const readerElement = document.getElementById('reader');
-    readerElement.style.display = 'block';
+  const readerElement = document.getElementById('reader');
+  readerElement.style.display = 'block';
 
-    const html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      async (decodedText) => {
-        html5QrCode.stop();
-        readerElement.style.display = 'none';
+  const html5QrCode = new Html5Qrcode("reader");
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    async (decodedText) => {
+      html5QrCode.stop();
+      readerElement.style.display = 'none';
 
-        const itemId = decodedText.trim();
+      const itemId = decodedText.trim();
 
-        // ✅ ตรวจสอบว่ามีการยืมค้างอยู่หรือไม่
+      // ✅ แสดงโหลดก่อนตรวจสอบสถานะ
+      Swal.fire({
+        title: 'Checking item status...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
         const statusRes = await fetch(`${scriptURL}?action=checkItemStatus&itemId=${itemId}`);
         const statusData = await statusRes.json();
+
+        Swal.close(); // ✅ ปิดโหลดเมื่อเช็คเสร็จ
 
         if (statusData.success && statusData.isBorrowed) {
           Swal.fire({
@@ -452,21 +461,30 @@
           return;
         }
 
-        // แสดงฟอร์มกรอกข้อมูล
         document.getElementById('itemId').value = itemId;
         document.getElementById('itemName').value = itemId;
         document.getElementById('borrow-form').style.display = 'block';
+      } catch (err) {
+        Swal.close();
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to check item status.',
+          confirmButtonColor: '#dc2626'
+        });
+        console.error(err);
       }
-    ).catch(err => {
-      Swal.fire({
-        icon: 'error',
-        title: 'Camera Error',
-        text: 'Unable to access camera. Please check permissions.',
-        confirmButtonColor: '#1e3a8a'
-      });
-      console.error(err);
+    }
+  ).catch(err => {
+    Swal.fire({
+      icon: 'error',
+      title: 'Camera Error',
+      text: 'Unable to access camera. Please check permissions.',
+      confirmButtonColor: '#1e3a8a'
     });
+    console.error(err);
   });
+});
 
   document.getElementById("borrow-form").addEventListener("submit", async function(e) {
     e.preventDefault();
